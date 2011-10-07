@@ -4,9 +4,20 @@ print "$length arguments entered\n";
 
 #No argument run of this program should give sequence of uniform composition with length of 1 kbp
 if ($length ==0) {
-print generateSequence(25,25,25,25,100,"sequence")."\n";
+print generateSequence(25,25,25,25,161,"sequence")."\n";
 }
 
+
+#This subroutine returns statistics related to an input sequence in the following manner
+sub calc {
+my $length = @_;
+#if block below does basic error checking
+if ($length != 1) {
+die "too many arguments";
+} elsif ($+[0] =~ /[agct]/i) {
+die "too many arguments";
+}
+}
 
 #This subroutine requires 4 arguments, which should be given in the following order: %A, %T, %C, %G, length, name
 #percentage of A, T, C, G should be given as integers
