@@ -4,11 +4,72 @@ print "$length arguments entered\n";
 
 #No argument run of this program should give sequence of uniform composition with length of 1 kbp
 if ($length ==0) {
-	while(<>) {
-	$rand = int(rand($_)); #if range is 100, max number that can be is 99
-	print("$rand\n");	
-	
-	}
+print generateSequence(25,25,25,25,1000,"sequence")."\n";
 }
 
 
+#This subroutine requires 4 arguments, which should be given in the following order: %A, %T, %C, %G, length, name
+#percentage of A, T, C, G should be given as integers
+sub generateSequence {
+my $length = @_;
+#if block below does basic error checking
+if ($length != 6) {
+die "insufficient arguments given to subroutine generateSequence";
+} elsif (($_[0] + $_[1] + $_[2] + $_[3]) != 100) {
+die "improper composition given to generateSequene subroutine";
+} elsif ($_[4] < 0) {
+die "must generate a sequence with positive length";
+}
+my $description =">$_[5] $_[0]% A $_[1]% T $_[2]% C $_[3]% G $_[4] bp\n"; #top line gives name, composition, and length
+$length = $_[4] + $_[4] % 3 - 6; #ensure that length is a multiple of 3 and account for start and stop codon
+my $numA = int($_[0]/100*$_[4] * $length);
+my $numT = int($_[1]/100*$_[4] * $length);
+my $numC = int($_[2]/100*$_[4] * $length);
+my $numG = int($_[3]/100*$_[4] * $length);
+my $toReturn = "ATG"; #each sequence returned must start with a start codon
+#randomly select a stop codon and modify the number of A, T, C, and G accordingly
+my $rand = int(rand(3));
+my $stop = "TAG";
+if ($rand == 0){
+$stop = "TAG";
+$numT--;
+$numA--;
+$numG--;
+} elsif ($rand == 1){
+$stop = "TAA";
+$numT--;
+$numA-=2;
+} else {
+$stop = "TGA";
+$numT--;
+$numA--;
+$numG--;
+}
+for (my $i =0; $i < $length; $i++) {
+$nucAdded = 0;
+	while ($nucAdded == 0){
+	$rand = int(rand(5));
+		if($rand == 0 && $numA > 0) {
+		$toReturn = $toReturn."A";
+		$numA--;
+		$nucAdded = 1;
+		} elsif($rand == 1 && $numT > 0) {
+		$toReturn = $toReturn."T";
+		$numT--;
+		$nucAdded = 1;
+		} elsif($rand == 2 && $numC > 0) {
+		$toReturn = $toReturn."C";		
+		$numC--;
+		$nucAdded = 1;
+		} elsif($rand == 3 && $numG > 0) {
+		$toReturn = $toReturn."G";		
+		$numG--;
+		$nucAdded = 1;
+		}	
+	}
+	if (length($toReturn)%80 ==0) {
+	$toReturn = $toReturn."\n";
+	}
+}
+return $description.$toReturn.$stop;
+}
