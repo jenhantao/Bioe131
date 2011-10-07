@@ -5,7 +5,7 @@ print "$length arguments entered\n";
 #No argument run of this program should give sequence of uniform composition with length of 1 kbp
 if ($length ==0) {
 print generateSequence(50,25,25,0,161,"sequence")."\n";
-print calc("AAaaaaaAAATTTT\n");
+print calc("AAAAATTTT\n");
 }
 
 
@@ -19,11 +19,13 @@ die "too many arguments";
 die "subroutine calc detected an illegal character in input DNA sequence";
 }
 my $seq = $_[0];
-$seq = tr/a/a/i;
-my $numA = @-;
-$seq = tr/t/t/i;
-$numT = @-;
-return ("found $numA A's, $numT T's\n");
+$seq = uc ($seq);
+my $length = length ($seq);
+my $numA = ($seq =~ tr/A/A/);
+my $numT = ($seq =~ tr/T/T/);
+my $numC = ($seq =~ tr/C/C/);
+my $numG = ($seq =~ tr/G/G/);
+return ("found $numA A's, $numT T's, $numC C's, $numG G's\n");
 }
 
 #This subroutine requires 4 arguments, which should be given in the following order: %A, %T, %C, %G, length, name
