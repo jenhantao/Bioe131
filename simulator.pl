@@ -12,7 +12,28 @@ print OUTPUT generateSequence(25, 25, 25, 25, 1000,"Simulated Sequence");
 	for(my $i=0; $i<$length; $i++){
 		if($ARGV[$i] =~/^-calc/) {
 			if(defined($ARGV[$i+1])) {
-
+			open(CALCINPUT,$ARGV[$i+1]);
+			#while loop below will add all nonblank lines to an array
+				while ($line = <CALCINPUT>) {
+				chomp($line);
+				if ($line =~ /(.){1,}/) {
+				push(@nonBlankLines, $line);
+				}
+			}		
+			close(CALCINPUT);
+			@nonBlankLines[scalar(@nonBlankLines)]=""; #while loop pulls an extra blank line, define this extra line or error occurrs
+			#for loop below iterates through all non blank lines, operates on the lines and then prints into the file "output.fasta"
+			for ($i= 0; $i< scalar(@nonBlankLines); $i++) {
+				if ($nonBlankLines[$i] =~ /^(>){1}/) {
+				$i++;
+				$sequence = "";
+					while ($nonBlankLines[$i] =~ /^([agctAGCT])+/ && $i< scalar(@nonBlankLines)) { 
+					$sequence = $sequence.$nonBlankLines[$i];
+					$i++;		
+				}
+			$i--;
+			push(@params, calcStats($sequence));
+			}
 
 			} else {
 			die "error: please specify a file to calculate from";
@@ -38,6 +59,11 @@ print OUTPUT generateSequence(25, 25, 25, 25, 1000,"Simulated Sequence");
 		}
 	}
 
+}
+#FINISH THIS!!!!
+$paramLength = @params;
+for ($i =0; $i < $paramLength-1; $i += 5) {
+$params[$i], $params[$i+1], $params[$i+2], $params[$i+3], $params[$i+4]
 }
 close OUTPUT;
 
