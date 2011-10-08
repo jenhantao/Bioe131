@@ -3,14 +3,45 @@ $length = @ARGV;
 print "$length arguments entered\n";
 
 #No argument run of this program should give sequence of uniform composition with length of 1 kbp
-if ($length ==0) {
-print generateSequence(50,25,25,0,161,"sequence")."\n";
-print calc("AAAAATTTT\n");
+if ($length ==0 ) {
+open(OUTPUT, ">simulatedSequence.fasta");
+print OUTPUT generateSequence(25, 25, 25, 25, 1000,"Simulated Sequence");
+close OUTPUT;
+} elsif($length > 0) {
+@default = {"25", "25", "25", "25", "1000"};
+@params=undef;
+	foreach(@ARGV){
+	print "command $_\n";
+		if($_ =~/^-calc/) {
+		print "I should calc something\n";
+		} elsif($_ =~/^-load/) {
+		print "I should load something\n";
+		} elsif($_ =~/^-save/) {
+		print "I should save something\n";
+			if (!defined(@params)) {
+			print "moo\n";
+			}
+
+		}
+	}
+}
+
+#this subroutine saves the statistics for one sequence into a file
+#inputs required are an array containing the output of subroutine calcStats and a file to save into
+sub save{
+print "opening $_[1]\n";
+open(PARAM, ">$_[1]");
+my @stats = $_[0];
+print PARAM "Composition: $stats[0] $stats[1] $stats[2] $stats[3] \n";
+print PARAM "Length: $stats[4]";
+close(PARAM);
 }
 
 
-#This subroutine returns statistics related to an input sequence in the following manner
-sub calc {
+
+
+#This subroutine returns statistics related to an input sequence in the following order: percentage of A, T, C, and G, and then length. The statistic are returned in an array that whose indices correspond to the order described above.
+sub calcStats {
 my $length = @_;
 #if block below does basic error checking
 if ($length != 1) {
@@ -19,17 +50,21 @@ die "too many arguments";
 die "subroutine calc detected an illegal character in input DNA sequence";
 }
 my $seq = $_[0];
-$seq = uc ($seq);
-my $length = length ($seq);
-my $numA = ($seq =~ tr/A/A/);
-my $numT = ($seq =~ tr/T/T/);
-my $numC = ($seq =~ tr/C/C/);
-my $numG = ($seq =~ tr/G/G/);
-return ("found $numA A's, $numT T's, $numC C's, $numG G's\n");
+$seq = (uc ($seq));
+chomp($seq);
+$length = length ($seq);
+my $numA = ($seq =~ tr/A/A/)/$length;
+my $numT = ($seq =~ tr/T/T/)/$length;
+my $numC = ($seq =~ tr/C/C/)/$length;
+my $numG = ($seq =~ tr/G/G/)/$length;
+my @toReturn = ("$numA", "$numT", "$numC", "$numG", "$length");
+return @toReturn;
 }
 
+
+
 #This subroutine requires 4 arguments, which should be given in the following order: %A, %T, %C, %G, length, name
-#percentage of A, T, C, G should be given as integers
+#percentage of A, T, C, G should be given in percentage, not decimal notation
 #This subroutine returns a string that corresponds to a FASTA 
 sub generateSequence {
 my $length = @_;
@@ -66,10 +101,10 @@ $numA--;
 $numG--;
 }
 my $toReturn = "ATG"; #each sequence returned must start with a start codon
-for (my $i =1; $i <= $length; $i++) {
+for (my $i =3; $i < $length+3; $i++) {
 $nucAdded = 0;
 	#every line should only have 80 characters
-	if (length($toReturn)%80 ==0 ) {
+	if ($i%80 ==0) {
 	$toReturn = $toReturn."\n";
 	}
 	while ($nucAdded == 0){
