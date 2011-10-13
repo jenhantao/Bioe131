@@ -3,37 +3,101 @@ $length = @ARGV;
 print "$length arguments entered\n";
 
 #No argument run of this program should give sequence of uniform composition with length of 1 kbp
-if ($length ==0 ) {
 open(OUTPUT, ">simulatedSequence.fasta");
+if ($length ==0 ) {
 print OUTPUT generateSequence(25, 25, 25, 25, 1000,"Simulated Sequence");
-close OUTPUT;
 } elsif($length > 0) {
-@default = {"25", "25", "25", "25", "1000"};
-@params=undef;
-	foreach(@ARGV){
-	print "command $_\n";
-		if($_ =~/^-calc/) {
-		print "I should calc something\n";
-		} elsif($_ =~/^-load/) {
-		print "I should load something\n";
-		} elsif($_ =~/^-save/) {
-		print "I should save something\n";
-			if (!defined(@params)) {
-			print "moo\n";
+@default = ("25", "25", "25", "25", "1000");
+@params = undef;
+	for(my $i=0; $i<$length; $i++){
+		if($ARGV[$i] =~/^-calc/) {
+			if(defined($ARGV[$i+1])) {
+			open(CALCINPUT,$ARGV[$i+1]);
+			#while loop below will add all nonblank lines to an array
+				while ($line = <CALCINPUT>) {
+				chomp($line);
+				if ($line =~ /(.){1,}/) {
+				push(@nonBlankLines, $line);
+				}
+			}		
+			close(CALCINPUT);
+			@nonBlankLines[scalar(@nonBlankLines)]=""; #while loop pulls an extra blank line, define this extra line or error occurrs
+			#for loop below iterates through all non blank lines, operates on the lines and then prints into the file "output.fasta"
+			for ($i= 0; $i< scalar(@nonBlankLines); $i++) {
+				if ($nonBlankLines[$i] =~ /^(>){1}/) {
+				$i++;
+				$sequence = "";
+					while ($nonBlankLines[$i] =~ /^([agctAGCT])+/ && $i< scalar(@nonBlankLines)) { 
+					$sequence = $sequence.$nonBlankLines[$i];
+					$i++;		
+				}
+			$i--;
+			push(@params, calcStats($sequence));
 			}
 
+			} else {
+			die "error: please specify a file to calculate from";
+			}
+			} elsif($ARGV[$i] =~/^-load/) {
+			if(defined($ARGV[$i+1])) {
+			@params =load($ARGV[$i+1]);
+			} else {
+			die "error: please specify a file to load";
+			}
+		} elsif($ARGV[$i] =~/^-save/) {
+			if (!defined($params[0])) {
+			print "saving default configurations\n";
+			@params = @default;
+			}
+			if(defined($ARGV[$i+1])) {
+			push(@params, $ARGV[$i+1]);
+			$i++;
+			} else {
+			push(@params, "savedParams");
+			}
+			save(@params);
 		}
 	}
+
 }
+#FINISH THIS!!!!
+$paramLength = @params;
+for ($i =0; $i < $paramLength-1; $i += 5) {
+$params[$i], $params[$i+1], $params[$i+2], $params[$i+3], $params[$i+4]
+}
+close OUTPUT;
+
+
+#this subroutine reads in a parameter file, the only input is the filename
+#return a list of parameter denoting parameters for sequence generation, pulls all integers
+sub load{
+if (!-e $_[0]) {
+die "error: specify a valid file to load";
+} else {
+open (INPUT, $_[0]);
+my @toReturn;
+	while (<INPUT>) {
+	chomp($_);
+		while ($_ =~ /(\d){1,}/g) {
+		push (@toReturn, $&);
+		}
+	}
+close INPUT;
+return @toReturn;
+}
+}
+
 
 #this subroutine saves the statistics for one sequence into a file
 #inputs required are an array containing the output of subroutine calcStats and a file to save into
 sub save{
-print "opening $_[1]\n";
-open(PARAM, ">$_[1]");
-my @stats = $_[0];
-print PARAM "Composition: $stats[0] $stats[1] $stats[2] $stats[3] \n";
-print PARAM "Length: $stats[4]";
+my $saveLength = @_;
+open(PARAM, ">$_[$saveLength-1]");
+my @stats = @_;
+for ($i =0; $i < $saveLength-1; $i += 5) {
+print PARAM "Composition: $stats[$i] $stats[$i+1] $stats[$i+2] $stats[$i+3] \n";
+print PARAM "Length: $stats[$i+4]\n";
+}
 close(PARAM);
 }
 
@@ -45,9 +109,9 @@ sub calcStats {
 my $length = @_;
 #if block below does basic error checking
 if ($length != 1) {
-die "too many arguments";
+die "error: too many arguments";
 } elsif (!$_[0] =~ /[agct]/i) {
-die "subroutine calc detected an illegal character in input DNA sequence";
+die "error: subroutine calc detected an illegal character in input DNA sequence";
 }
 my $seq = $_[0];
 $seq = (uc ($seq));
