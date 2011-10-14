@@ -1,18 +1,18 @@
 #! /usr/bin/perl -w
 $length = @ARGV;
-print "$length arguments entered\n";
-
 #No argument run of this program should give sequence of uniform composition with length of 1 kbp
 open(OUTPUT, ">simulatedSequence.fasta");
 if ($length ==0 ) {
 print OUTPUT generateSequence(25, 25, 25, 25, 1000,"Simulated Sequence");
-} elsif($length > 0) {
+} elsif($length > 0) { #loop through the supplied arguments
 @default = ("25", "25", "25", "25", "1000");
-@params = undef;
 	for(my $i=0; $i<$length; $i++){
 		if($ARGV[$i] =~/^-calc/) {
 			if(defined($ARGV[$i+1])) {
 			open(CALCINPUT,$ARGV[$i+1]);
+			if (!-e CALCINPUT) {
+			die "input file for calculation does not exist\n";
+			} 
 			#while loop below will add all nonblank lines to an array
 				while ($line = <CALCINPUT>) {
 				chomp($line);
@@ -23,47 +23,53 @@ print OUTPUT generateSequence(25, 25, 25, 25, 1000,"Simulated Sequence");
 			close(CALCINPUT);
 			@nonBlankLines[scalar(@nonBlankLines)]=""; #while loop pulls an extra blank line, define this extra line or error occurrs
 			#for loop below iterates through all non blank lines, operates on the lines and then prints into the file "output.fasta"
-			for ($i= 0; $i< scalar(@nonBlankLines); $i++) {
-				if ($nonBlankLines[$i] =~ /^(>){1}/) {
-				$i++;
+			for ($j= 0; $j< scalar(@nonBlankLines); $j++) {
+				if ($nonBlankLines[$j] =~ /^(>){1}/) {
+				$j++;
 				$sequence = "";
-					while ($nonBlankLines[$i] =~ /^([agctAGCT])+/ && $i< scalar(@nonBlankLines)) { 
-					$sequence = $sequence.$nonBlankLines[$i];
-					$i++;		
+					while ($nonBlankLines[$j] =~ /^([agctAGCT])+/ && $j< scalar(@nonBlankLines)) { 
+					$sequence = $sequence.$nonBlankLines[$j];
+					$j++;		
+					}
+				$j--;
+				push(@params, calcStats($sequence));
 				}
-			$i--;
-			push(@params, calcStats($sequence));
 			}
-
 			} else {
 			die "error: please specify a file to calculate from";
 			}
-			} elsif($ARGV[$i] =~/^-load/) {
+		} elsif($ARGV[$i] =~/^-load/) {
 			if(defined($ARGV[$i+1])) {
 			@params =load($ARGV[$i+1]);
 			} else {
 			die "error: please specify a file to load";
 			}
-		} elsif($ARGV[$i] =~/^-save/) {
+		} elsif($ARGV[$i] =~/^-save/) { #loads default configurations if save is called before load or calc
 			if (!defined($params[0])) {
-			print "saving default configurations\n";
 			@params = @default;
 			}
 			if(defined($ARGV[$i+1])) {
-			push(@params, $ARGV[$i+1]);
+			$saveParamTitle = $ARGV[$i+1];
 			$i++;
 			} else {
-			push(@params, "savedParams");
+			$saveParamTitle = "savedParams";
 			}
 			save(@params);
+		#display help
+		} elsif($ARGV[$i] =~/^-h/) {
+		print "The following options are available to this program: -load, -save, -calc, -h.  -load is invoked by supplying -load followed by a file name when the program is run. -calc and -save are invoked in a similar fasion. -save will automatically use the name savedParams if no file name is given.  Arguments can be called in order, but they are interpreted sequentially. And so calling -save before -calc will cause the default parameters (uniform composition) instead of the composition calculated with -calc\n";
 		}
 	}
 
 }
-#FINISH THIS!!!!
+
+
 $paramLength = @params;
-for ($i =0; $i < $paramLength-1; $i += 5) {
-$params[$i], $params[$i+1], $params[$i+2], $params[$i+3], $params[$i+4]
+$seqNumber = 1;
+for ($i =0; $i < $paramLength; $i += 5) {
+$sequence = generateSequence($params[$i], $params[$i+1], $params[$i+2], $params[$i+3], $params[$i+4], "sequence$seqNumber");
+$seqNumber++;
+print OUTPUT $sequence;
 }
 close OUTPUT;
 
@@ -75,15 +81,15 @@ if (!-e $_[0]) {
 die "error: specify a valid file to load";
 } else {
 open (INPUT, $_[0]);
-my @toReturn;
+my @loaded;
 	while (<INPUT>) {
 	chomp($_);
-		while ($_ =~ /(\d){1,}/g) {
-		push (@toReturn, $&);
+		while ($_ =~ /([\d.]){1,}/g) {
+		push (@loaded, $&);
 		}
 	}
 close INPUT;
-return @toReturn;
+return @loaded;
 }
 }
 
@@ -92,7 +98,7 @@ return @toReturn;
 #inputs required are an array containing the output of subroutine calcStats and a file to save into
 sub save{
 my $saveLength = @_;
-open(PARAM, ">$_[$saveLength-1]");
+open(PARAM, ">$saveParamTitle");
 my @stats = @_;
 for ($i =0; $i < $saveLength-1; $i += 5) {
 print PARAM "Composition: $stats[$i] $stats[$i+1] $stats[$i+2] $stats[$i+3] \n";
@@ -117,10 +123,10 @@ my $seq = $_[0];
 $seq = (uc ($seq));
 chomp($seq);
 $length = length ($seq);
-my $numA = ($seq =~ tr/A/A/)/$length;
-my $numT = ($seq =~ tr/T/T/)/$length;
-my $numC = ($seq =~ tr/C/C/)/$length;
-my $numG = ($seq =~ tr/G/G/)/$length;
+my $numA = sprintf("%.2f",($seq =~ tr/A/A/)/$length*100);
+my $numT = sprintf("%.2f",($seq =~ tr/T/T/)/$length*100);
+my $numC = sprintf("%.2f",($seq =~ tr/C/C/)/$length*100);
+my $numG = sprintf("%.2f",($seq =~ tr/G/G/)/$length*100);
 my @toReturn = ("$numA", "$numT", "$numC", "$numG", "$length");
 return @toReturn;
 }
@@ -135,8 +141,6 @@ my $length = @_;
 #if block below does basic error checking
 if ($length != 6) {
 die "insufficient arguments given to subroutine generateSequence";
-} elsif (($_[0] + $_[1] + $_[2] + $_[3]) != 100) {
-die "improper composition given to generateSequene subroutine";
 } elsif ($_[4] < 0) {
 die "must generate a sequence with positive length";
 }
@@ -211,5 +215,5 @@ $nucAdded = 0;
 	
 
 }
-return $description.$toReturn.$stop;
+return $description.$toReturn.$stop."\n";
 }
