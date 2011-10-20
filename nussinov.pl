@@ -31,8 +31,9 @@ sub calcMaxMatches {
 my $seq =$_[0];
 for ($i = length($seq); $i>0; $i--) {
 	$scores[$i][$i]=0;
-	print "position ($i,$i) is 0\n";
 	for ($j=$i+1;$j<=length($seq); $j++) {
+	#assign (Ni,j)
+	#@scores[$i,$j]= max( N(i+1,j-1)+1 if there is a match at the end, N(i+1,j), N(i,j-1)		
 		for ($k=$i+1;$k<=$j-1; $k++) {
 		#assign N(i,j)
 		#@scores[$i][$j] = max ( N(i,j),  N(i,k) + N(k+1,j) 
