@@ -7,14 +7,21 @@ die "error: invalid characters contained in input sequence";
 } 
 
 #for ($i=1; $i<length($ARGV[0]); $i++) {
+$count = 0;
 for ($i=0; $i<4; $i++) {
 @temp = qw(1 2 3 4);
+print "count: $count\n";
+@temp = map{$_+ $count } @temp;
+$count++;
+foreach(@temp) {
+}
 $arrayOfArrays[$i] = [@temp];	
 }
 
-for ($i=0; $i<length(@arrayOfArrays); $i++) {
-print length()."\n";
-
-	
+foreach my $row(@arrayOfArrays){
+   foreach my $val(@$row){
+      print "$val ";
+   }
+   print "\n";
 }
 
