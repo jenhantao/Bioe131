@@ -9,8 +9,18 @@ die "error: invalid characters contained in input sequence";
 for ($i=1; $i<=length($ARGV[0]); $i++) {
 $scores[$i] = ["0"];	
 }
-calcMaxMatches($ARGV[0]);
 
+#define which nucleotides match
+%bases =(
+A => "U",
+U => "A",
+C => "G",
+G => "C"
+);
+if("C"=~$bases{U}) {
+print "moo\n";
+}
+calcMaxMatches(uc($ARGV[0]));
 
 #test block
 #for ($i=1; $i<=length($ARGV[0]); $i++) {
@@ -32,11 +42,28 @@ my $seq =$_[0];
 for ($i = length($seq); $i>0; $i--) {
 	$scores[$i][$i]=0;
 	for ($j=$i+1;$j<=length($seq); $j++) {
+	#assign N(i,j)
+	#@scores[$i,$j]= max( N(i+1,j-1)+1 if there is a match at the end, N(i+1,j), N(i,j-1)
+		if($bases{substr($seq,$i,1)} =~ substr($seq,$j-1,1)) {
+		@scores[$i,$j]= max(0);
+		print "MATCH\n";
+		} else {
+		print "merh\n";
+		}	
+
 		for ($k=$i+1;$k<=$j-1; $k++) {
 		#assign N(i,j)
 		#@scores[$i][$j] = max ( N(i,j),  N(i,k) + N(k+1,j) 
-		print "i: $i j: $j k: $k\n";
+		#print "i: $i j: $j k: $k\n";
 		}	
 	}
 } 
 }
+
+
+sub max {
+my @sorted =sort { $a <=> $b } @_;
+return $sorted[@sorted-1];
+}
+
+
