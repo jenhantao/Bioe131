@@ -3,7 +3,7 @@
 if (@ARGV != 1) {
 die "error: improper number of arguments given\n the only argument should be an RNA sequence (case insensitive).\n";
 }
- elsif ($ARGV[0] =~ /[^augc]+/) {
+ elsif ($ARGV[0] =~ /[^augcAUGC]+/) {
 die "error: invalid characters contained in input sequence";
 } 
 #initialize a 2D array
