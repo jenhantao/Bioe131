@@ -7,10 +7,14 @@ die "error: improper number of arguments given\n the only argument should be an 
 die "error: invalid characters contained in input sequence";
 } 
 #initialize a 2D array
-#for ($i=1; $i<=length($ARGV[0]); $i++) {
-#$scores[$i] = ["0"];	
-#}
-@scores =();
+@scores = ();
+$seqLength = length($ARGV[0])-1;
+for ($i=0; $i<=$seqLength; $i++) {
+	for ($j=0; $j<$seqLength; $j++) {
+	$scores[$i][$j] = 0;
+	}
+}
+
 
 #define which nucleotides match
 %bases =(
@@ -28,27 +32,15 @@ for ($i = length($seq)-1; $i>-1; $i--) {
 	for ($j=$i+1;$j<length($seq); $j++) {
 	#assign N(i,j)
 	#@scores[$i,$j]= max( N(i+1,j-1)+1 if there is a match at the end, N(i+1,j), N(i,j-1)
-	
 	if($bases{substr($seq,$i,1)} =~ substr($seq,$j,1)) {
 	$bonus = 1;
 	} else {
 	$bonus = 0;
 	}
-	if (defined($scores[$i + 1][$j - 1])){
 	$caseA = $scores[$i + 1][$j - 1] + $bonus;
-	} else {
-	$caseA = $bonus;
-	}
-	if (defined($scores[$i + 1][$j])) {
 	$caseB = $scores[$i + 1][$j];
-	} else {
-	$caseB = 0;
-	}
-	if (defined($caseC = $scores[$i][$j + 1])){
 	$caseC = $scores[$i][$j + 1];
-	} else {
 	$caseC=0;
-	}
 	$scores[$i][$j] = max($caseA, $caseB, $caseC);
 		for ($k=$i+1;$k<=$j-1; $k++) {
 		$scores[$i][$j] = max($scores[$i][$j], $scores[$i][$k] + $scores[$k + 1][$j]);
@@ -60,8 +52,13 @@ return $scores[0][length($seq)-1];
 
 
 sub max {
-my @sorted =sort { $a <=> $b } @_;
-return $sorted[@sorted-1];
+my $max = $_[0];
+for (@_) {
+if ($_ > $max) {
+$max = $_;
+}
+}
+return $max
 }
 
 
