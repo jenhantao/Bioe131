@@ -39,6 +39,8 @@ for ($i = length($seq)-1; $i>-1; $i--) {
                               $scores[$i][$j + 1]
                           );
 		for ($k=$i+1;$k<=$j-1; $k++) {
+		#assign N(i,j)
+		#@scores[$i][$j] = max ( N(i,j),  N(i,k) + N(k+1,j) 
 		$scores[$i][$j] = max($scores[$i][$j], $scores[$i][$k] + $scores[$k + 1][$j]);
 		}	
 	}
@@ -46,7 +48,8 @@ for ($i = length($seq)-1; $i>-1; $i--) {
 print $scores[0][length($seq)-1]."\n";
 
 
-
+#given a list of numeric arguments, this subroutine finds and returns the largest value
+#Written to handle undefined values
 sub max {
 my $max = $_[0];
 for (@_) {
