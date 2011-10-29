@@ -3,17 +3,12 @@
 if (@ARGV != 1) {
 die "error: improper number of arguments given\n the only argument should be an RNA sequence (case insensitive).\n";
 }
- elsif ($ARGV[0] =~ /[^augc]+/) {
+ elsif ($ARGV[0] =~ /[^augcAUGC]+/) {
 die "error: invalid characters contained in input sequence";
 } 
 #initialize a 2D array
 @scores = ();
-$seqLength = length($ARGV[0])-1;
-for ($i=0; $i<=$seqLength; $i++) {
-	for ($j=0; $j<$seqLength; $j++) {
-	$scores[$i][$j] = 0;
-	}
-}
+
 
 
 #define which nucleotides match
@@ -23,10 +18,7 @@ U => "A",
 C => "G",
 G => "C"
 );
-print "final score: ".calcMaxMatches(uc($ARGV[0]))."\n";
-
-sub calcMaxMatches {
-my $seq =$_[0];
+my $seq = uc($ARGV[0]);
 for ($i = length($seq)-1; $i>-1; $i--) {
 	$scores[$i][$i]=0;
 	for ($j=$i+1;$j<length($seq); $j++) {
@@ -46,8 +38,8 @@ for ($i = length($seq)-1; $i>-1; $i--) {
 		}	
 	}
 }
-return $scores[0][length($seq)-1];
-}
+print $scores[0][length($seq)-1]."\n";
+
 
 
 sub max {

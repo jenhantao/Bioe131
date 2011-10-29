@@ -23,10 +23,7 @@ U => "A",
 C => "G",
 G => "C"
 );
-print "final score: ".calcMaxMatches(uc($ARGV[0]))."\n";
-
-sub calcMaxMatches {
-my $seq =$_[0];
+my $seq = uc($ARGV[0]);
 for ($i = length($seq)-1; $i>-1; $i--) {
 	$scores[$i][$i]=0;
 	for ($j=$i+1;$j<length($seq); $j++) {
@@ -46,8 +43,8 @@ for ($i = length($seq)-1; $i>-1; $i--) {
 		}	
 	}
 }
-return $scores[0][length($seq)-1];
-}
+print $scores[0][length($seq)-1]."\n";
+
 
 
 sub max {
