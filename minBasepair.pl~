@@ -1,0 +1,151 @@
+#! /usr/bin/perl -w
+#This block validates the input argument
+$sequence=""; #initialize sequence
+
+#define which nucleotides match
+%bases =(
+A => "U",
+U => "A",
+C => "G",
+G => "C"
+);
+generateSequence(100);
+
+print (calcMaxMatches($sequence)."\n");
+print "$sequence\n";
+
+sub calcMaxMatches {
+#initialize a 2D array
+my @scores = ();
+$seqLength = 100;
+for ($i=0; $i<$seqLength; $i++) {
+	for ($j=0; $j<$seqLength; $j++) {
+	$scores[$i][$j] = 0;
+	}
+}
+my $seq = uc($_[0]);
+for ($i = length($seq)-1; $i>-1; $i--) {
+	$scores[$i][$i]=0;
+	for ($j=$i+1;$j<length($seq); $j++) {
+	#assign N(i,j)
+	#@scores[$i,$j]= max( N(i+1,j-1)+1 if there is a match at the end, N(i+1,j), N(i,j-1)
+	if($bases{substr($seq,$i,1)} =~ substr($seq,$j,1)) {
+	$bonus = 1;
+	} else {
+	$bonus = 0;
+	}
+	$scores[$i][$j] = max($scores[$i + 1][$j - 1] + $bonus,
+                              $scores[$i + 1][$j],
+                              $scores[$i][$j + 1]
+                          );
+		for ($k=$i+1;$k<=$j-1; $k++) {
+		$scores[$i][$j] = max($scores[$i][$j], $scores[$i][$k] + $scores[$k + 1][$j]);
+		}	
+	}
+}
+return $scores[0][length($seq)-1];
+}
+
+
+sub max {
+my $max = $_[0];
+for (@_) {
+if (defined($_)) {
+	if ($_ > $max) {
+	$max = $_;
+	}
+}
+}
+return $max
+}
+
+
+#This subroutine requires 4 arguments, which should be given in the following order: %A, %T, %C, %G, length, name
+#percentage of A, T, C, G should be given in percentage, not decimal notation
+#This subroutine returns a string that corresponds to a FASTA 
+sub generateSequence {
+my $length = $_[0];
+my $numA = 20;
+my $numU = 20;
+my $numC = 20;
+my $numG = 20;
+for (my $k =0; $k < $length; $k++) {
+my $caseA = calcMaxMatches($sequence."A");
+my $caseU = calcMaxMatches($sequence."U");
+my $caseC = calcMaxMatches($sequence."C");
+my $caseG = calcMaxMatches($sequence."G");
+#print "A:$caseA U:$caseU C:$caseC G:$caseG\n";
+$nucAdded =0;
+	while ($nucAdded == 0){
+	$rand = int(rand(5));
+	#print "k:$k rand:$rand\n";
+	if (($numA+$numU+$numC+$numG)>0) {
+		if($rand == 0 && $caseA <= $caseU && $caseA <= $caseG && $caseA <= $caseC && $numA>0 && $nucAdded==0) {
+		$sequence = $sequence."A";
+		$numA--;
+		$nucAdded = 1;
+		}
+		if($rand == 1 && $caseU <= $caseA && $caseU <= $caseG && $caseU <= $caseU && $numU>0&& $nucAdded==0) {
+		$sequence = $sequence."U";
+		$numU--;
+		$nucAdded = 1;
+		} 
+		if($rand == 2 && $caseC <= $caseU && $caseC <= $caseG && $caseC <= $caseA && $numC>0&& $nucAdded==0) {
+		$sequence = $sequence."C";
+		$numC--;
+		$nucAdded = 1;
+		} 
+		if($rand == 3 && $caseG <= $caseU && $caseG <= $caseA && $caseG <= $caseC && $numG>0&& $nucAdded==0) {
+		$sequence = $sequence."G";
+		$numG--;
+		$nucAdded = 1;
+		}
+		if ($nucAdded ==0) {
+		
+		if($rand == 0 && $numA > 0) {
+		$sequence = $sequence."A";
+		$numA--;
+		$nucAdded = 1;
+		} elsif($rand == 1 && $numU > 0) {
+		$sequence = $sequence."U";
+		$numU--;
+		$nucAdded = 1;
+		} elsif($rand == 2 && $numC > 0) {
+		$sequence = $sequence."C";		
+		$numC--;
+		$nucAdded = 1;
+		} elsif($rand == 3 && $numG > 0) {
+		$sequence = $sequence."G";		
+		$numG--;
+		$nucAdded = 1;
+		}
+
+
+		}
+	} else {
+		if ($rand == 0 && $caseA <= $caseU && $caseA <= $caseG && $caseA <= $caseC) {
+		$sequence = $sequence."A";
+		$nucAdded = 1;
+		}
+		if ($rand == 1 && $caseU <= $caseA && $caseU <= $caseG && $caseU <= $caseU) {
+		$sequence = $sequence."U";
+		$nucAdded = 1;
+		}
+		if ($rand == 2 && $caseC <= $caseU && $caseC <= $caseG && $caseC <= $caseA) {
+		$sequence = $sequence."C";
+		$nucAdded = 1;
+		}
+		if ($rand == 3 && $caseG <= $caseU && $caseG <= $caseA && $caseG <= $caseC) {
+		$sequence = $sequence."G";
+		$nucAdded = 1;
+		}
+	}	
+	}
+
+
+
+
+	
+
+}
+}
