@@ -24,9 +24,6 @@ die "error: specify a valid Stockholm file";
 		#print substr($lines[$i],0,50)."\n";
 		my @temp = split (' ', $lines[$i]);
 		push (@names, $temp[0]);
-		for (my $j=0; $j<length($temp[1]); $j++) {
-
-		}
 		
 	}
 }
