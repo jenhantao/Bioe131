@@ -70,7 +70,7 @@ $probDist{$j."-"} = $gaps/$height;
 #calculates the entropy of each column from the probability distributions
 #stores the entropy in an array where array index indicates the column
 sub findEntropy {
-for (my$j=0; $j<$width; $j++) {
+for (my$j=0; $j<$width+1; $j++) {
 my $AS = 0;
 my $US = 0;
 my $CS = 0;
@@ -92,21 +92,11 @@ if ($probDist{$j."-"}>0) {
 	$gapS = $probDist{$j."-"}*(log($probDist{$j."-"})/log(2));
 
 }
-
-	push(@entropies,
-		-(
-		$probDist{$j."A"}*(log($probDist{$j."A"})/log(2))+
-		$probDist{$j."U"}*(log($probDist{$j."U"})/log(2))+
-		$probDist{$j."C"}*(log($probDist{$j."C"})/log(2))+
-		$probDist{$j."G"}*(log($probDist{$j."G"})/log(2))+
-		$probDist{$j."-"}*(log($probDist{$j."-"})/log(2))
-		)	
-	);
+	push(@entropies,-($AS+$US+$CS+$GS+$gapS));
 }
-for($k=0;$k<@entropies;$k++) {
-print "$k\n";
-print "$entropies[$k]\n";
-}
+#for($k=0;$k<@entropies;$k++) {
+#print "k: $entropies[$k]\n";
+#}
 }
 
 
