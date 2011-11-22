@@ -92,19 +92,162 @@ if ($probDist{$j."-"}>0) {
 	$gapS = $probDist{$j."-"}*(log($probDist{$j."-"})/log(2));
 
 }
-	push(@entropies,
-		-(
-		$AS+
-		$US+
-		$CS+
-		$GS+
-		$gapS
-		)	
-	);
+	push(@entropies,-($AS+$US+$CS+$GS+$gapS));
 }
 #for($k=0;$k<@entropies;$k++) {
 #print "k: $entropies[$k]\n";
 #}
+}
+#this subroutine will find the joint probabilities and store it in a hash
+#key is given in the format ixjy
+sub findJointProb {
+for(my $i=0; $i<$width+1; $i++) {
+		my @iArows = ();
+		my @iUrows = ();
+		my @iCrows = ();
+		my @iGrows = ();
+		my @igaprows = ();
+		for (my $k=0; $k<$height; $k++) {
+			if ($matrix[$k][$i] =~ /A/) {
+			push(@iArows,$k);
+			} elsif ($matrix[$k][$i] =~ /U/) {
+			push(@iUrows,$k);
+			} elsif ($matrix[$k][$i] =~ /G/) {
+			push(@iGrows,$k);
+			} elsif ($matrix[$k][$i] =~ /C/) {
+			push(@iCrows,$k);
+			} elsif ($matrix[$k][$i] =~ /[\.-]/) {
+			push(@igaprows,$k);
+			}
+		}
+	for(my $j=$i+1; $j<$width+1; $j++) {
+		my $numA =0;
+		my $numU =0;
+		my $numG =0;
+		my $numC =0;
+		my $numgaps =0;
+		for(my $l=0; $l<@iArows; $l++) {
+			if($matrix[$l][$j] =~ /A/) {
+				$numA++;
+			} elsif ($matrix[$l][$i] =~ /U/) {
+				$numU++;
+			} elsif ($matrix[$l][$i] =~ /G/) {
+				$numG++;
+			} elsif ($matrix[$l][$i] =~ /C/) {
+				$numC++;
+			} elsif ($matrix[$l][$i] =~ /[\.-]/) {
+				$numgaps++;
+			}
+		}
+		$jointProbDist{$i."A".$j."A"} = $numA/$height;
+		$jointProbDist{$i."A".$j."U"} = $numU/$height;
+		$jointProbDist{$i."A".$j."G"} = $numG/$height;
+		$jointProbDist{$i."A".$j."C"} = $numC/$height;
+		$jointProbDist{$i."A".$j."-"} = $numgaps/$height;
+
+
+		$numA =0;
+		$numU =0;
+		$numG =0;
+		$numC =0;
+		$numgaps =0;
+		for(my $l=0; $l<@iUrows; $l++) {
+			if($matrix[$l][$j] =~ /A/) {
+				$numA++;
+			} elsif ($matrix[$l][$i] =~ /U/) {
+				$numU++;
+			} elsif ($matrix[$l][$i] =~ /G/) {
+				$numG++;
+			} elsif ($matrix[$l][$i] =~ /C/) {
+				$numC++;
+			} elsif ($matrix[$l][$i] =~ /[\.-]/) {
+				$numgaps++;
+			}
+		}
+		$jointProbDist{$i."U".$j."A"} = $numA/$height;
+		$jointProbDist{$i."U".$j."U"} = $numU/$height;
+		$jointProbDist{$i."U".$j."G"} = $numG/$height;
+		$jointProbDist{$i."U".$j."C"} = $numC/$height;
+		$jointProbDist{$i."U".$j."-"} = $numgaps/$height;
+
+
+
+		$numA =0;
+		$numU =0;
+		$numG =0;
+		$numC =0;
+		$numgaps =0;
+		for(my $l=0; $l<@iGrows; $l++) {
+			if($matrix[$l][$j] =~ /A/) {
+				$numA++;
+			} elsif ($matrix[$l][$i] =~ /U/) {
+				$numU++;
+			} elsif ($matrix[$l][$i] =~ /G/) {
+				$numG++;
+			} elsif ($matrix[$l][$i] =~ /C/) {
+				$numC++;
+			} elsif ($matrix[$l][$i] =~ /[\.-]/) {
+				$numgaps++;
+			}
+		}
+		$jointProbDist{$i."G".$j."A"} = $numA/$height;
+		$jointProbDist{$i."G".$j."U"} = $numU/$height;
+		$jointProbDist{$i."G".$j."G"} = $numG/$height;
+		$jointProbDist{$i."G".$j."C"} = $numC/$height;
+		$jointProbDist{$i."G".$j."-"} = $numgaps/$height;
+	
+
+
+
+		$numA =0;
+		$numU =0;
+		$numG =0;
+		$numC =0;
+		$numgaps =0;
+		for(my $l=0; $l<@iCrows; $l++) {
+			if($matrix[$l][$j] =~ /A/) {
+				$numA++;
+			} elsif ($matrix[$l][$i] =~ /U/) {
+				$numU++;
+			} elsif ($matrix[$l][$i] =~ /G/) {
+				$numG++;
+			} elsif ($matrix[$l][$i] =~ /C/) {
+				$numC++;
+			} elsif ($matrix[$l][$i] =~ /[\.-]/) {
+				$numgaps++;
+			}
+		}
+		$jointProbDist{$i."C".$j."A"} = $numA/$height;
+		$jointProbDist{$i."C".$j."U"} = $numU/$height;
+		$jointProbDist{$i."C".$j."G"} = $numG/$height;
+		$jointProbDist{$i."C".$j."C"} = $numC/$height;
+		$jointProbDist{$i."C".$j."-"} = $numgaps/$height;
+
+		$numA =0;
+		$numU =0;
+		$numG =0;
+		$numC =0;
+		$numgaps =0;
+		for(my $l=0; $l<@igaprows; $l++) {
+			if($matrix[$l][$j] =~ /A/) {
+				$numA++;
+			} elsif ($matrix[$l][$i] =~ /U/) {
+				$numU++;
+			} elsif ($matrix[$l][$i] =~ /G/) {
+				$numG++;
+			} elsif ($matrix[$l][$i] =~ /C/) {
+				$numC++;
+			} elsif ($matrix[$l][$i] =~ /[\.-]/) {
+				$numgaps++;
+			}
+		}
+		$jointProbDist{$i."-".$j."A"} = $numA/$height;
+		$jointProbDist{$i."-".$j."U"} = $numU/$height;
+		$jointProbDist{$i."-".$j."G"} = $numG/$height;
+		$jointProbDist{$i."-".$j."C"} = $numC/$height;
+		$jointProbDist{$i."-".$j."-"} = $numgaps/$height;
+	}
+}
 }
 
 
@@ -114,6 +257,8 @@ die "error: too many inputs given, please specify the name of 1 stockholm file o
 readStockholm($ARGV[0]);
 findProbDist();
 findEntropy();
+findJointProb();
+$test=$jointProbDist{'1A2-'};
 
 
 
