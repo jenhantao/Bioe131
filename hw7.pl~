@@ -1,0 +1,26 @@
+#! /usr/bin/perl -w
+
+
+
+
+my %scoreHash = (one => "1", two => "2", 
+                        three => "3");
+my @nodes = qw(1 2 3); 
+my @heights = qw(3 2 1);
+splice (@nodes,2,1); #use spice to remove elements: array, index, offset (always 1 in this program)
+foreach(@nodes) {
+print "$_\n";
+}
+generateUPGMATree(\%scoreHash,\@nodes, \@heights);
+#This subroutine contains the implementation of the UPGMA algorithm
+#This subroutine requires 3 inputs, a hashtable containing the distance matrix (formatted according to the subroutine that parses input), an array containing all of the starting node names, and an array containing the heights of starting nodes; indexing of the heights array should be done with respect to the array containing the node names
+sub generateUPGMATree {
+my %scoreHash = %{$_[0]};
+my @nodes = @{$_[1]};
+my @heights = @{$_[2]};
+
+
+
+
+
+}
