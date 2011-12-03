@@ -7,7 +7,7 @@
 @inputs = readinput();
 
 #generateUPGMATree(\%scoreHash,\@nodes, \@heights);
-generateUPGMATree(@inputs);
+#generateUPGMATree(@inputs);
 
 
 
@@ -27,7 +27,6 @@ while(@nodes>1) {
 		for (my $j=0; $j<@nodes; $j++) {
 			if ($i != $j) {
 				my $key = $nodes[$i].$nodes[$j];
-				#print("score: ".$minScore."\n");
 				#print("value: $scoreHash{$key}\n");
 				print "retrieving value for $key\n";	
 				if($scoreHash{$key} < $minScore) {
@@ -100,6 +99,26 @@ sub readinput {
 
 	#print "@nodes\n";
 	#print "@heights\n";
+print "--------------------------------------\n";
+foreach(%scoreHash) {
+print ("$_\n");
+}
+print "--------------------------------------\n";
+
+	for (my $i=0; $i<@nodes; $i++) {
+		for (my $j=0; $j<@nodes; $j++) {
+			if ($i != $j) {
+				my $key = $nodes[$i].$nodes[$j];
+				print "retrieving value for $key\n";	
+				print("value: $scoreHash{$key}\n");
+			}
+		}	
+	}
+
+
+
+
+
 	my @toReturn = ();
 	push(@toReturn, \%scoreHash);
 	push(@toReturn, \@nodes);
