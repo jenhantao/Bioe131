@@ -1,10 +1,17 @@
 #! /usr/bin/perl -w
+#Author: Jenhan Tao, Homayun Mehrabani
+#Input: Distance matrix
+#Creates a tree
+#Output: Newick format of the tree
+
+@inputs = readinput();
+
+#generateUPGMATree(\%scoreHash,\@nodes, \@heights);
+generateUPGMATree(@inputs);
 
 
 
 
-
-generateUPGMATree(\%scoreHash,\@nodes, \@heights);
 #This subroutine contains the implementation of the UPGMA algorithm
 #This subroutine requires 3 inputs, a hashtable containing the distance matrix (formatted according to the subroutine that parses input), an array containing all of the starting node names, and an array containing the heights of starting nodes; indexing of the heights array should be done with respect to the array containing the node names
 sub generateUPGMATree {
@@ -19,7 +26,10 @@ while(@nodes>1) {
 	for (my $i=0; $i<@nodes; $i++) {
 		for (my $j=0; $j<@nodes; $j++) {
 			if ($i != $j) {
-				my $key = $nodes[$i].$nodes[$j];	
+				my $key = $nodes[$i].$nodes[$j];
+				#print("score: ".$minScore."\n");
+				#print("value: $scoreHash{$key}\n");
+				print "retrieving value for $key\n";	
 				if($scoreHash{$key} < $minScore) {
 					$mini = $i;
 					$minj = $j;
@@ -28,7 +38,7 @@ while(@nodes>1) {
 			} 
 		}	
 	}
-	push(@heights, 0.5*($heights{$mini} + $heights{$minj} + $minScore)); #add the height of k
+	push(@heights, 0.5*($heights[$mini] + $heights[$minj] + $minScore)); #add the height of k
 	push(@nodes, "($nodes[$mini]:".($heights[-1]-$heights[$mini]).",$nodes[$minj]:".($heights[-1]-$heights[$mini]).")"); #add k to the list of nodes; k's name is given in newick format
 	#remove nodes i and j
 	for(my $z=0; $z<@nodes-1; $z++) {#the last element is k
@@ -57,18 +67,17 @@ print "Given the input file, the tree in newick format is:\n$nodes[0]\n"; #there
 #Reads in the input file and creates a hash table of original distances
 sub readinput {
 	open (FILE, $ARGV[0]) || die "Error: File does not exist\n";
-	$seqnum = 0;
-	@nodes = ();
-	@heights = ();
-
-	while ($line = <FILE>) {
+	my $seqnum = 0;
+	my @nodes = ();
+	my @heights = ();
+	my %tempHash = ();
+	while (my $line = <FILE>) {
 
 		$seqnum = $seqnum + 1;
 		chomp $line;
-		@temparray = split (/\s+/, $line);
+		my @temparray = split (/\s+/, $line);
 		shift @temparray;
 		$length = scalar @temparray;
-
 		#Creates an array with the name of all the initial nodes
 		push (@nodes, $temparray[0]);		
 
@@ -82,16 +91,18 @@ sub readinput {
 	}
 
 	#Creates the hash table for the input distance matrix
+	my %scoreHash = ();
 	for ($i=1; $i<$seqnum; $i++) {
 		for ($j=1; $j<$length; $j++) {
 			$scoreHash{$tempHash{$i.'_'.0}.$tempHash{$j.'_'.0}} = $tempHash{$i.'_'.$j};
 		}
 	}
 
-	print "@nodes\n";
-	print "@heights\n";
-
-	return @nodes;
-	return @heights;
-	return %scoreHash;
+	#print "@nodes\n";
+	#print "@heights\n";
+	my @toReturn = ();
+	push(@toReturn, \%scoreHash);
+	push(@toReturn, \@nodes);
+	push(@toReturn, \@heights);
+	return @toReturn;
 }
