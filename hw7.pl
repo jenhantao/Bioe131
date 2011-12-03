@@ -5,8 +5,6 @@
 #Output: Newick format of the tree
 
 @inputs = readinput();
-
-#generateUPGMATree(\%scoreHash,\@nodes, \@heights);
 generateUPGMATree(@inputs);
 
 
@@ -15,13 +13,9 @@ generateUPGMATree(@inputs);
 #This subroutine contains the implementation of the UPGMA algorithm
 #This subroutine requires 3 inputs, a hashtable containing the distance matrix (formatted according to the subroutine that parses input), an array containing all of the starting node names, and an array containing the heights of starting nodes; indexing of the heights array should be done with respect to the array containing the node names
 sub generateUPGMATree {
-print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
 my %scoreHash = %{$_[0]};
 my @nodes = @{$_[1]};
 my @heights = @{$_[2]};
-foreach(@nodes) {
-print "$_\n";
-}
 while(@nodes>1) {
 	my $mini = 0;
 	my $minj = 1;
@@ -30,9 +24,7 @@ while(@nodes>1) {
 	for (my $i=0; $i<@nodes; $i++) {
 		for (my $j=0; $j<@nodes; $j++) {
 			if ($i != $j) {
-				my $key = $nodes[$i].$nodes[$j];
-				#print("value: $scoreHash{$key}\n");
-				print "retrieving value for $key\n";	
+				my $key = $nodes[$i].$nodes[$j];	
 				if($scoreHash{$key} < $minScore) {
 					$mini = $i;
 					$minj = $j;
@@ -42,18 +34,26 @@ while(@nodes>1) {
 		}	
 	}
 	push(@heights, 0.5*($heights[$mini] + $heights[$minj] + $minScore)); #add the height of k
-	push(@nodes, "($nodes[$mini]:".($heights[-1]-$heights[$mini]).",$nodes[$minj]:".($heights[-1]-$heights[$mini]).")"); #add k to the list of nodes; k's name is given in newick format
+	push(@nodes, "($nodes[$mini]:".($heights[-1]-$heights[$mini]).",$nodes[$minj]:".($heights[-1]-$heights[$mini]).")"); 
+#add k to the list of nodes; k's name is given in newick format
 	#remove nodes i and j
-	for(my $z=0; $z<@nodes-1; $z++) {#the last element is k
+	for(my $z=0; $z<@nodes-1; $z++) {
 		if ($z != $mini && $z != $minj) {
 			$scoreHash{$nodes[$z].$nodes[-1]} = 0.5 * ($scoreHash{$nodes[$z].$nodes[$mini]} 
 								+ $scoreHash{$nodes[$z].$nodes[$minj]});
+			$scoreHash{$nodes[-1].$nodes[$z]} = 0.5 * ($scoreHash{$nodes[$z].$nodes[$mini]} 
+								+ $scoreHash{$nodes[$z].$nodes[$minj]});
 		}
 	}
+	if ($mini<$minj) {
 	splice (@nodes,$mini,1);
+	splice (@nodes,$minj-1,1);
+	} else {
 	splice (@nodes,$minj,1);
+	splice (@nodes,$mini-1,1);
+	}
 }
-print "Given the input file, the tree in newick format is:\n$nodes[0]\n"; #there should only be one node left
+print "Given the input file, the tree in newick format is:\n$nodes[0];\n"; #there should only be one node left
 # Input: a “distance matrix”, Dij
 #• Let N be the set of nodes to be joined
 #• Let the “height” of node i be Hi
@@ -68,6 +68,8 @@ print "Given the input file, the tree in newick format is:\n$nodes[0]\n"; #there
 #– Add k to N; remove i & j
 }
 #Reads in the input file and creates a hash table of original distances
+
+
 sub readinput {
 	open (FILE, $ARGV[0]) || die "Error: File does not exist\n";
 	my $seqnum = 0;
@@ -92,30 +94,14 @@ sub readinput {
 			$tempHash{$seqnum.'_'.$j} = $temparray[$j];
 		}
 	}
-
+	close (FILE);
 	#Creates the hash table for the input distance matrix
 	my %scoreHash = ();
-	print "seqnum: $seqnum\n";
 	for ($i=1; $i<$seqnum+1; $i++) {
 		for ($j=1; $j<$length; $j++) {
-			print "$i,$j\n";
 			$scoreHash{$tempHash{$i.'_'.0}.$tempHash{$j.'_'.0}} = $tempHash{$i.'_'.$j};
 		}
 	}
-
-	#print "@nodes\n";
-	#print "@heights\n";
-print "--------------------------------------\n";
-foreach(%scoreHash) {
-print ("$_\n");
-}
-print "--------------------------------------\n";
-
-
-
-
-
-
 	my @toReturn = ();
 	push(@toReturn, \%scoreHash);
 	push(@toReturn, \@nodes);
