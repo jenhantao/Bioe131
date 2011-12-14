@@ -17,9 +17,17 @@
 	      gat => "d", gac => "d", gaa => "e", gag => "e",
 	      ggt => "g", ggc => "g", gga => "g", ggg => "g",
 	      );
-@aminoacids = qw(a c d e f g h i k l m n p q r s t v w y);
+#@aminoacids = qw(a c d e f g h i k l m n p q r s t v w y);
 
-optimizeCodonDistance ("aaatttaaaaaagggccc");
+print optimizeCodonDistance("aaatttttcaaaaaagggccc")."\n";
+#optimizeCodonDistance("aaatttttcaaaaaagggccc");
+
+
+
+
+
+
+
 
 #this subroutine takes one argument, a DNA sequence given as a string
 #returns one string representing a DNA sequence which should code for the same polypeptide, but distances between identical codons should be maximized
@@ -38,29 +46,45 @@ for (my $i=0; $i<length($seq); $i+=3) {
 	my $codon = substr($seq, $i, 3);
 	my $aa = $codonHash{$codon};
 	if (defined($codonLocations{$codon})) {
-		$codonLocations{$codon} = $codonLocations{$codon}.",".int($i);
+		$codonLocations{$codon} = $codonLocations{$codon}.",".int($i/3);
 	} else {
-		$codonLocations{$codon} = int($i);
+		$codonLocations{$codon} = int($i/3);
 	}
 	if (defined($aaLocations{$aa})) {
-		$aaLocations{$aa} = $aaLocations{$aa}.",".int($i);
+		$aaLocations{$aa} = $aaLocations{$aa}.",".int($i/3);
 	} else {
-		$aaLocations{$aa} = int($i);
+		$aaLocations{$aa} = int($i/3);
 	}
-push (@seqArray, substr($seq, $i, 3));
+	push (@seqArray, substr($seq, $i, 3));
 }
 #optimize distances here
-foreach(@aminoacids) {
-print "aa: $_\n";
-my @aaIndices = split(/,/, $aaLocations{$_});
-#my @codonIndices = split(/,/, $codonLocations{$_});
-
-
-}
 
 foreach my $key (keys %codonLocations) {
-	print "$key\n";
-} 
-
-
+	my @codonIndices = split(/,/, $codonLocations{$key}); #locations of a particular codon
+	my @aaIndices = split(/,/, $aaLocations{$codonHash{$key}});
+	#print "$key\ncodon locations:";
+	#foreach(@codonIndices) {
+	#	print "$_,";
+	#}
+	#print "\naa locations:   ";	
+	#foreach(@aaIndices) {
+	#	print "$_,";
+	#}
+	#print "\n";
+	my $swapIncrement = int (@aaIndices/@codonIndices);
+	#print "$swapIncrement\n";
+	for (my $i=0; $i<@aaIndices; $i+=$swapIncrement) {
+		my $a = shift(@codonIndices); #the codon at position A will be substituted for another
+		my $temp = $seqArray[$a];
+		$seqArray[$a] = $seqArray[$aaIndices[$i]];
+		$seqArray[$aaIndices[$i]] = $temp;
+	} 
+}
+$length = @seqArray;
+print "length: $length\n";
+foreach(@seqArray) {
+print "$_";
+}
+print "\n";
+return join("",@seqArray);
 }
