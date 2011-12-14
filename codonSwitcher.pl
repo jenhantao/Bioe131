@@ -1,6 +1,4 @@
 #! /usr/bin/perl -w
-optimizeCodonDistance ("aaatttaaaaaagggccc");
-
 
 %codonHash = (ttt => "f", ttc => "f", tta => "l", ttg => "l",
 	      tct => "s", tcc => "s", tca => "s", tcg => "s",
@@ -19,6 +17,10 @@ optimizeCodonDistance ("aaatttaaaaaagggccc");
 	      gat => "d", gac => "d", gaa => "e", gag => "e",
 	      ggt => "g", ggc => "g", gga => "g", ggg => "g",
 	      );
+@aminoacids = qw(a c d e f g h i k l m n p q r s t v w y);
+
+optimizeCodonDistance ("aaatttaaaaaagggccc");
+
 #this subroutine takes one argument, a DNA sequence given as a string
 #returns one string representing a DNA sequence which should code for the same polypeptide, but distances between identical codons should be maximized
 sub optimizeCodonDistance {
@@ -30,15 +32,28 @@ if(length($seq) % 3 != 0) {
 	die "error: input dna sequence must be composed of complete 3 base codons\n";
 }
 my @seqArray = ();
-my %aaLocations = (); #gives the positions at which a particular amino is located, the codon is the hash, returned value is a string of locations; 1 letter code is used
-my %codonLocations =(); #gives the positions at which a particular codon is located, the codon is the hash, returned value is a string of locations
+my %aaLocations = (); #gives the positions at which a particular amino is located, the codon is the hash, returned value is a string of locations; 1 letter code is used; position is given as 0 indexed codon positions
+my %codonLocations =(); #gives the positions at which a particular codon is located, the codon is the hash, returned value is a string of locations; position is given as 0 indexed codon positions
 for (my $i=0; $i<length($seq); $i+=3) {
 	my $codon = substr($seq, $i, 3);
-	print("key:".$codon." value:".$aaLocations{$codon}."\n");
-	if (defined($codonLocations{
-	push (@seqArray, substr($seq, $i, 3));
-
+	my $aa = $codonHash{$codon};
+	if (defined($codonLocations{$codon})) {
+		$codonLocations{$codon} = $codonLocations{$codon}.",".int($i);
+	} else {
+		$codonLocations{$codon} = int($i);
+	}
+	if (defined($aaLocations{$aa})) {
+		$aaLocations{$aa} = $aaLocations{$aa}.",".int($i);
+	} else {
+		$aaLocations{$aa} = int($i);
+	}
+push (@seqArray, substr($seq, $i, 3));
 }
+#optimize distances here
+#my @codonIndices = split(/,/, $codonLocations{$_});
+foreach my $key (keys %codonLocations) {
+	print "$key\n";
+} 
 
 
 }
