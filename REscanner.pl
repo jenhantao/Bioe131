@@ -4,6 +4,9 @@ print "cccgggaaaATAtttcccATA\n";
 $returnedSequence = removeRESites("cccgggaaaATAtttcccATA",\@mysites);
 print "my optimized sequence is:\n$returnedSequence\n";
 
+
+
+
 #this subroutine takes as its argument 1 DNA nucleotide sequence and a list of RE sites; the list of RE sites should be given as a reference
 #this subroutine will return 1 DNA sequence that encodes for the same polypeptide, but does not contain any of the restriction sites given
 #start and stop codons are not required; removal of RE sites is achieved through silent mutations
@@ -80,10 +83,10 @@ my @toReturn = ();
 while (<INPUT>) {
 	chomp;
 	if ($_ !~ /^[\n\s\t\r>]+/ && $_ =~ /.+/) {
-		my $reverse = reverse($_);
+		my $reverse = lc(reverse($_));
 		$reverse =~ tr/[g,c,t,a]/[c,g,a,t]/;
 		push(@toReturn, lc($_));
-		push(@toReturn, lc($reverse));
+		push(@toReturn, $reverse));
 	}
 }
 close (INPUT);
