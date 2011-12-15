@@ -17,16 +17,6 @@
 	      gat => "d", gac => "d", gaa => "e", gag => "e",
 	      ggt => "g", ggc => "g", gga => "g", ggg => "g",
 	      );
-#@aminoacids = qw(a c d e f g h i k l m n p q r s t v w y);
-
-print optimizeCodonDistance("aaatttttcaaaaaagggccc")."\n";
-#optimizeCodonDistance("aaatttttcaaaaaagggccc");
-
-
-
-
-
-
 
 
 #this subroutine takes one argument, a DNA sequence given as a string
@@ -80,11 +70,5 @@ foreach my $key (keys %codonLocations) {
 		$seqArray[$aaIndices[$i]] = $temp;
 	} 
 }
-$length = @seqArray;
-print "length: $length\n";
-foreach(@seqArray) {
-print "$_";
-}
-print "\n";
 return join("",@seqArray);
 }

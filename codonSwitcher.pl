@@ -17,16 +17,6 @@
 	      gat => "d", gac => "d", gaa => "e", gag => "e",
 	      ggt => "g", ggc => "g", gga => "g", ggg => "g",
 	      );
-#@aminoacids = qw(a c d e f g h i k l m n p q r s t v w y);
-
-print optimizeCodonDistance("aaatttttcaaaaaagggccc")."\n";
-#optimizeCodonDistance("aaatttttcaaaaaagggccc");
-
-
-
-
-
-
 
 
 #this subroutine takes one argument, a DNA sequence given as a string
@@ -62,17 +52,7 @@ for (my $i=0; $i<length($seq); $i+=3) {
 foreach my $key (keys %codonLocations) {
 	my @codonIndices = split(/,/, $codonLocations{$key}); #locations of a particular codon
 	my @aaIndices = split(/,/, $aaLocations{$codonHash{$key}});
-	#print "$key\ncodon locations:";
-	#foreach(@codonIndices) {
-	#	print "$_,";
-	#}
-	#print "\naa locations:   ";	
-	#foreach(@aaIndices) {
-	#	print "$_,";
-	#}
-	#print "\n";
 	my $swapIncrement = int (@aaIndices/@codonIndices);
-	#print "$swapIncrement\n";
 	for (my $i=0; $i<@aaIndices; $i+=$swapIncrement) {
 		my $a = shift(@codonIndices); #the codon at position A will be substituted for another
 		my $temp = $seqArray[$a];

@@ -55,20 +55,14 @@ my $position = $_[1];
 my @sites = @{$_[2]};
 my $length = length($sequence);
 $cp = int($position / 3);
-#print "offending position is in codon $cp\n";
 #switch codon i with the offending codon
 for (my $i=0; $i < $cp; $i++) {
-	#print "i: $i\n";
-	#print "before:$sequence\n";
-	#print "swithing ".substr($sequence, $cp*3, 3)." with ".substr($sequence, $i*3, 3)."\n";
 	my $toReturn = substr($sequence,0,$i*3).substr($sequence, $cp*3, 3).substr($sequence, $i*3+3, $cp*3-($i*3+3)).substr($sequence, $i*3,3).substr($sequence,$cp*3+3, $length-($cp*3+3));  
-	#print "after: $toReturn\n";
 	if (checkRESites($sequence,\@sites) == 0) {
 		return $toReturn;
 	}
 }
 return $sequence;
-
 }
 
 sub readREfasta {
@@ -86,7 +80,10 @@ my @toReturn = ();
 while (<INPUT>) {
 	chomp;
 	if ($_ !~ /^[\n\s\t\r>]+/ && $_ =~ /.+/) {
+		my $reverse = reverse($_);
+		$reverse =~ tr/[g,c,t,a]/[c,g,a,t]/;
 		push(@toReturn, lc($_));
+		push(@toReturn, lc($reverse));
 	}
 }
 close (INPUT);
